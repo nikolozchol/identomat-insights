@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { createSupabaseServer } from '../../../../lib/supabase/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,17 @@ export async function POST(req: Request) {
   const workspaceId = (wsData ?? [])[0]?.id as string | undefined;
   if (!workspaceId) return NextResponse.json({ error: 'no workspace' }, { status: 500 });
 
+  let ownerEmail: string | null = null;
+  try {
+    const auth = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await auth.auth.getUser();
+    ownerEmail = user?.email ?? null;
+  } catch {
+    /* owner is best-effort */
+  }
+
   const title = (suggestion || finding || area).slice(0, 120);
   const ctx = `Observed on the ${mapType || 'heatmap'}${pagePath ? ` for ${pagePath}` : ''}`;
   const parts = [`${ctx}: ${finding || area}.`];
@@ -49,6 +61,7 @@ export async function POST(req: Request) {
       title,
       brief,
       category: 'ux',
+      owner: ownerEmail,
       effort: 'M',
       expected_impact: IMPACT[severity],
       status: 'new',

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { createSupabaseServer } from '../../../../lib/supabase/server';
 import { generateActions } from '../../../../lib/actions';
 
 export const runtime = 'nodejs';
@@ -27,12 +27,26 @@ export async function POST(req: Request) {
 
   try {
     const r = await generateActions({ workspaceId, insightId });
-    if (r.created > 0) {
-      revalidatePath('/');
-      revalidatePath('/actions');
-      return NextResponse.json({ ok: true, created: r.created });
+
+    // Best-effort: attribute the action(s) just created for this insight to the signed-in user.
+    try {
+      const auth = await createSupabaseServer();
+      const {
+        data: { user },
+      } = await auth.auth.getUser();
+      if (user?.email) {
+        await supabase
+          .from('actions')
+          .update({ owner: user.email })
+          .eq('workspace_id', workspaceId)
+          .eq('insight_id', insightId)
+          .is('owner', null);
+      }
+    } catch {
+      /* owner stamping is best-effort; never block the conversion */
     }
-    // candidates === 0 -> already has an action (or not eligible); treat as a no-op success
+
+    if (r.created > 0) return NextResponse.json({ ok: true, created: r.created });
     return NextResponse.json({ ok: false, created: 0, noop: r.candidates === 0 });
   } catch (err) {
     const m = err instanceof Error ? err.message : String(err);
