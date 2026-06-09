@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Check, ListChecks, MoreHorizontal, Clock, X } from 'lucide-react';
 import type { InsightRow, Polarity } from './types';
 import { SEV_VAR } from './types';
+import { InsightElaborate } from './InsightElaborate';
 
 export type MuteKind = 'snooze' | 'dismiss';
 
@@ -22,6 +23,7 @@ function fmt(v: unknown): string {
   return JSON.stringify(v);
 }
 
+// Mirrors generateActions' selection: issue/opportunity at high/medium severity.
 export function qualifiesForAction(i: InsightRow): boolean {
   return (i.polarity === 'issue' || i.polarity === 'opportunity') && (i.severity === 'high' || i.severity === 'medium');
 }
@@ -115,26 +117,32 @@ export function InsightCard({
       )}
       {i.sources && i.sources.length > 0 && <div className="mt-2 text-[11px] text-fg-3">via {i.sources.join(', ')}</div>}
 
-      {qualifiesForAction(i) && (
-        <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-          {converted ? (
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-up">
-              <Check size={13} strokeWidth={2.5} /> In action queue
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onConvert(i.id)}
-              disabled={converting}
-              className="inline-flex items-center gap-1.5 rounded-[var(--radius-ctl)] border border-iris-border bg-iris-dim px-2.5 py-1.5 text-[12px] font-medium text-iris-bright transition-colors hover:bg-[rgba(124,108,255,0.22)] disabled:opacity-60"
-            >
-              <ListChecks size={13} strokeWidth={2} />
-              {converting ? 'Adding…' : failed ? 'Retry — convert to action' : 'Convert to action'}
-            </button>
-          )}
-          {failed && !converting && <span className="text-[11px] text-down">Something went wrong</span>}
-        </div>
-      )}
+      <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3">
+        {qualifiesForAction(i) && (
+          <div className="flex items-center gap-2">
+            {converted ? (
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-up">
+                <Check size={13} strokeWidth={2.5} /> In action queue
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onConvert(i.id)}
+                disabled={converting}
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-ctl)] border border-iris-border bg-iris-dim px-2.5 py-1.5 text-[12px] font-medium text-iris-bright transition-colors hover:bg-[rgba(124,108,255,0.22)] disabled:opacity-60"
+              >
+                <ListChecks size={13} strokeWidth={2} />
+                {converting ? 'Adding…' : failed ? 'Retry — convert to action' : 'Convert to action'}
+              </button>
+            )}
+            {failed && !converting && <span className="text-[11px] text-down">Something went wrong</span>}
+          </div>
+        )}
+        <InsightElaborate
+          insightId={i.id}
+          offerConvert={(i.polarity === 'issue' || i.polarity === 'opportunity') && !qualifiesForAction(i)}
+        />
+      </div>
     </article>
   );
 }

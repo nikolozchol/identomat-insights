@@ -100,5 +100,8 @@ export default async function PagesPage() {
 
   const pages = [...map.values()].sort((a, b) => b.sessions - a.sessions);
 
-  return <PagesTable pages={pages} actionedInsightIds={actionedInsightIds} />;
+  const { data: hiddenData } = await supabase.rpc('excluded_page_paths', { p_workspace: workspaceId });
+  const hiddenPaths = ((hiddenData ?? []) as Array<{ page_path: string }>).map((r) => r.page_path);
+
+  return <PagesTable pages={pages} actionedInsightIds={actionedInsightIds} hiddenPaths={hiddenPaths} />;
 }
