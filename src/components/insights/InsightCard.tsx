@@ -141,6 +141,7 @@ export function InsightCard({
         <InsightElaborate
           insightId={i.id}
           offerConvert={(i.polarity === 'issue' || i.polarity === 'opportunity') && !qualifiesForAction(i)}
+          askHref={`/ask?insight=${i.id}`}
         />
       </div>
     </article>

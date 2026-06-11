@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, Radio, Sparkles, ListChecks, Flame, Settings, LogOut, type LucideIcon } from 'lucide-react';
+import { LayoutDashboard, FileText, Radio, Globe, Sparkles, ListChecks, Flame, Settings, LogOut, type LucideIcon } from 'lucide-react';
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -10,6 +10,7 @@ const NAV: NavItem[] = [
   { href: '/', label: 'Insights', icon: LayoutDashboard },
   { href: '/pages', label: 'Pages', icon: FileText },
   { href: '/channels', label: 'Channels', icon: Radio },
+  { href: '/countries', label: 'Countries', icon: Globe },
   { href: '/ask', label: 'Ask AI', icon: Sparkles },
   { href: '/actions', label: 'Actions', icon: ListChecks },
   { href: '/heatmaps', label: 'Heatmaps', icon: Flame },

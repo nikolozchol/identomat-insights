@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Sparkles, ChevronDown, Database, Lightbulb, Wrench, ListChecks, Check } from 'lucide-react';
 
 type Sections = { data_shows: string[]; likely_drivers: string[]; suggestions: string[] };
@@ -33,7 +34,7 @@ function Section({ icon, title, items }: { icon: React.ReactNode; title: string;
   );
 }
 
-export function InsightElaborate({ insightId, offerConvert }: { insightId: string; offerConvert: boolean }) {
+export function InsightElaborate({ insightId, offerConvert, askHref }: { insightId: string; offerConvert: boolean; askHref?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -98,16 +99,23 @@ export function InsightElaborate({ insightId, offerConvert }: { insightId: strin
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-fg-2 transition-colors hover:text-fg"
-      >
-        <Sparkles size={13} strokeWidth={2} className="text-iris-bright" />
-        {open ? 'Hide details' : 'Go deeper'}
-        <ChevronDown size={13} strokeWidth={2} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={open}
+          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-fg-2 transition-colors hover:text-fg"
+        >
+          <Sparkles size={13} strokeWidth={2} className="text-iris-bright" />
+          {open ? 'Hide details' : 'Go deeper'}
+          <ChevronDown size={13} strokeWidth={2} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+        {askHref && (
+          <Link href={askHref} className="text-[12px] font-medium text-fg-2 underline underline-offset-2 transition-colors hover:text-fg">
+            Ask AI about this
+          </Link>
+        )}
+      </div>
 
       {open && (
         <div className="mt-3">
